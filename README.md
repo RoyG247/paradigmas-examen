@@ -9,3 +9,4 @@ Apuntes para el examen de Paradigmas de Programación
 - [JS: Generadores y Asincronía](JS_Generadores_Asincronia.md)
 - [DCG, Combinadores y Recursión de Cola](Combinadores_DCG_Recursion_Cola.md)
 - [Autómatas, Visitors de AST, Búsqueda Combinatoria y Mónadas](Automatas_Visitors_Busqueda_Monadas.md)
+- [Forro del II Parcial](Forro_II_Parcial.md)
