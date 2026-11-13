@@ -8,3 +8,4 @@ Apuntes para el examen de Paradigmas de Programación
 - [Cálculo Lambda — Parte 2](Calculo_Lambda_Parte2.md)
 - [JS: Generadores y Asincronía](JS_Generadores_Asincronia.md)
 - [DCG, Combinadores y Recursión de Cola](Combinadores_DCG_Recursion_Cola.md)
+- [Autómatas, Visitors de AST, Búsqueda Combinatoria y Mónadas](Automatas_Visitors_Busqueda_Monadas.md)
