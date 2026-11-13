@@ -2,7 +2,7 @@
 
 Solo reglas, tablas y plantillas genéricas. **Sin ejercicios ni ejemplos resueltos.**
 ⭐ = énfasis del profesor: si el espacio no alcanza, copiar primero estas secciones.
-➕ = bloques nuevos de la V2 (lo demás es igual a la V1).
+➕ = bloques nuevos de la V2 (lo demás es igual a la V1). 🔧 = cómo se usa (plantillas de sintaxis).
 
 ---
 
@@ -82,6 +82,28 @@ async function f() { try { const v = await p } catch (e) { } }
 - La clausura guarda la **variable**, no una copia del valor: ve los cambios posteriores.
 - `let` en un `for` crea una variable por vuelta; `var` comparte una sola.
 
+**🔧 Cómo se usan las funciones en JS**
+```javascript
+const f = x => expr                          // una expresión: return implícito
+const g = (x, y) => { sentencias; return v } // con llaves: return OBLIGATORIO
+const h = () => ({ campo: v })               // devolver objeto: entre paréntesis
+
+const usar  = (fn, x) => fn(x)               // RECIBE una función (orden superior)
+const crear = a => x => expr                 // DEVUELVE una función (clausura: recuerda a)
+const c = crear(a);  c(x)                    // o de una vez: crear(a)(x)
+
+const curri   = a => b => c => expr          // currying:   curri(a)(b)(c)
+const parcial = curri(a)                     // aplicación parcial: espera b y luego c
+const p2      = fn.bind(null, a)             // parcial de una función normal
+
+const fabrica = () => {                      // clausura CON ESTADO
+    let estado = INI                         //   privado: solo lo ve la función de adentro
+    return () => { estado = OP(estado); return estado }
+}
+const componer = (f, g) => x => f(g(x))      // composición
+(x => expr)(arg)                             // lambda aplicada de inmediato (como un redex)
+```
+
 ## ⭐ 3. Generadores (JS)
 
 ```javascript
@@ -137,6 +159,46 @@ Azar entre `0` y `L-1`: `Math.floor(Math.random() * L)`.
 
 Referencia a método: `Clase::metodo`. Currying: `Function<A, Function<B, C>> f = a -> b -> …;` se llama `f.apply(a).apply(b)`. Composición: `f.andThen(g)`, `f.compose(g)`.
 
+**🔧 Cómo se usan las lambdas e interfaces funcionales en Java**
+```java
+Function<T, R>      f  = x -> expr;                    R r = f.apply(x);
+BiFunction<T, U, R> g  = (x, y) -> expr;               R r = g.apply(x, y);
+UnaryOperator<T>    u  = x -> expr;                    T t = u.apply(x);
+BinaryOperator<T>   op = (a, b) -> expr;               T t = op.apply(a, b);
+Predicate<T>        p  = x -> condicion;               boolean b = p.test(x);
+Supplier<T>         s  = () -> expr;                   T v = s.get();      // lazy: no calcula hasta get()
+Consumer<T>         c  = x -> { sentencias; };         c.accept(x);
+Runnable            r  = () -> { sentencias; };        r.run();
+
+x -> { sentencias; return valor; }                     // cuerpo en bloque: return obligatorio
+
+static <T, R> R usar(Function<T, R> f, T x) { return f.apply(x); }   // RECIBIR una función
+static Function<T, R> crear(A a) { return x -> expr; }               // DEVOLVER una función (clausura con a)
+
+Function<A, Function<B, C>> curri = a -> b -> expr;    C c = curri.apply(a).apply(b);
+Function<B, C> parcial = curri.apply(a);               // aplicación parcial
+
+f.andThen(g)    // primero f, luego g        f.compose(g)    // primero g, luego f
+p.and(q)   p.or(q)   p.negate()                        // combinar predicados
+```
+- En Java la lambda **no se llama con paréntesis**: se llama con el método de su interfaz (`apply`, `test`, `get`, `accept`).
+- Una lambda solo captura variables **efectivamente finales** (que no se reasignan).
+- Referencias a método: `Clase::estatico` · `objeto::metodo` · `Clase::metodoDeInstancia` · `Clase::new`.
+- Elegir la interfaz: ¿recibe algo y devuelve algo? `Function` · ¿devuelve boolean? `Predicate` · ¿no recibe? `Supplier` · ¿no devuelve? `Consumer`.
+
+**🔧 Cómo se arma un pipeline de Stream**
+```java
+R r = coleccion.stream()            // 1. fuente
+        .filter(p)                  // 2. cero o más intermedias (lazy)
+        .map(f)
+        .reduce(INI, op);           // 3. UNA terminal (la que hace correr todo)
+
+List<R> l      = coleccion.stream().map(f).toList();
+Optional<T> o  = coleccion.stream().filter(p).findFirst();
+List<T> n      = Stream.iterate(INI, x -> siguiente).limit(N).toList();     // infinito + corte
+Stream<R> pl   = coleccion.stream().flatMap(x -> otraColeccion(x).stream()); // aplana
+```
+
 **➕ Java Stream**
 
 | | |
@@ -156,6 +218,27 @@ Referencia a método: `Clase::metodo`. Currying: `Function<A, Function<B, C>> f 
 
 **➕ Prolog: más metapredicados de listas**
 `partition(P, L, Si, No)` · `foldl(P, L1, L2, Ini, R)` · `maplist(P, L)` (todos cumplen) · `maplist(P, L1, L2, L3)` · `sum_list(L, S)` · `max_list` / `min_list` · `aggregate_all(count, G, N)` · `aggregate_all(sum(X), G, S)`.
+
+**🔧 Cómo se usan los metapredicados en Prolog**
+```prolog
+maplist(pred, L, L2)                              % pred(X, Y) definido aparte
+maplist([X, Y]>>(Y is EXPR), L, L2)               % o con lambda (yall)
+include([X]>>(CONDICION), L, L2)
+foldl([X, A0, A]>>(A is OP), L, INI, R)
+
+maplist(pred(Fijo), L, L2)                        % aplicación parcial: llama pred(Fijo, X, Y)
+
+findall(Plantilla, (meta1, meta2), L)             % varias metas: entre paréntesis
+forall(member(X, L), CONDICION)
+aggregate_all(count, Meta, N)
+
+call(P, A, B)                                     % P guardado en variable
+G =.. [Nombre | Args], call(G)                    % armar la meta y ejecutarla
+
+mi_combinador(P, X, R) :- call(P, X, R).          % RECIBIR un predicado
+```
+- A `maplist` / `include` / `foldl` se les pasa el **nombre** del predicado, sin argumentos: el combinador se los agrega al final.
+- Los parámetros de la lambda van entre corchetes: `[X, Y]>>(cuerpo)`; el cuerpo entre paréntesis.
 
 ## ⭐ 5. Recursión de cola
 
@@ -205,6 +288,22 @@ Pila: la cuenta se hace **al regresar**. Cola: **antes de llamar**. Ventaja: reu
 3. Asociatividad: `m.bind(f).bind(g)` ≡ `m.bind(x => f(x).bind(g))`
 
 **➕ `Optional` (Java):** `Optional.of(x)`, `Optional.empty()`, `Optional.ofNullable(x)` · `map`, `flatMap`, `filter` · `orElse(v)`, `orElseGet(sup)`, `isPresent()`, `ifPresent(c)`.
+
+**🔧 Cómo se encadena una mónada**
+```java
+R r = Optional.ofNullable(x)        // unit (admite null)
+        .map(f)                     // f devuelve valor normal
+        .flatMap(g)                 // g devuelve Optional  → bind
+        .orElse(POR_DEFECTO);       // salir de la caja
+```
+```javascript
+unitDeLaCaja(x)                     // Promise.resolve(x)
+    .then(f)                        // f devuelve valor o promesa → bind (aplana)
+    .catch(manejo)                  // estado rejected
+    .finally(limpieza)
+const v = await promesa             // salir de la caja (solo dentro de async)
+```
+Elegir: ¿la función devuelve un valor normal? `map` · ¿devuelve otra caja? `flatMap` (en promesas, `then` sirve para las dos).
 
 **Por qué es "modelo de estado":** sin mónada, el estado se maneja con variables mutables e `if` repartidos; con mónada, cada paso recibe el estado anterior dentro de la caja y devuelve una caja nueva: el estado se **encadena**, no se muta.
 
